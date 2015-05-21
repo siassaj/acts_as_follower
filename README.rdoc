@@ -174,6 +174,53 @@ The following methods take an optional hash parameter of ActiveRecord options (:
   followers_by_type, followers, blocks
 ---
 
+== Confirmable acts_as_followable
+
+A model that acts_as_followable can choose to have confirmed/unconfirmed follows.
+
+To set up a confirmable followable you need to set the confirmable key to true on the followable class:
+  class User < ActiveRecord::Base
+    ...
+    acts_as_followable confirmable: true
+    ...
+  end
+
+Then in a migration add the confirmed_at column:
+  add_column :follows, :confirmed_at, :datetime
+
+You can choose yourself the default value for this in the migration or in your controller or service objects, etc.
+
+To confirm a follower:
+  user.confirm_follower(follower)
+
+This will raise an exception if the follower object did not try to follow user
+
+To get confirmed followings
+  user.confirmed_followings
+
+To get unconfirmed followings
+  user.unconfirmed_followings
+
+To get confirmed followers
+  user.confirmed_followers
+
+To get unconfirmed followers
+  user.unconfirmed_followers
+
+To get confirmed followers count
+  user.confirmed_followers_count
+
+To get unconfirmed followers count
+  user.unconfirmed_followers_count
+
+To get confirmed followers by type
+  user.confirmed_followers_by_type_count(User)
+
+To get unconfirmed followers by type
+  user.unconfirmed_followers_by_type_count(follower_type)
+
+---
+
 === Follow Model
 
 The Follow model has a set of named_scope's.  In case you want to interface directly with the Follow model you can use them.
