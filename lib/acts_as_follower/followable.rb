@@ -114,6 +114,14 @@ module ActsAsFollower #:nodoc:
 
     module Confirmable
 
+      def confirm_follower(follower)
+        if (follow = get_follow_for(follower)).present?
+          follow.confirm!
+        else
+          raise Exception, "#{follower} has not followed #{self}"
+        end
+      end
+
       def confirmed_followings
         self.followings.confirmed
       end
@@ -129,7 +137,6 @@ module ActsAsFollower #:nodoc:
       def unconfirmed_followers_count
         self.followings.unconfirmed.unblocked.count
       end
-
 
       def confirmed_followers_by_type_count(follower_type)
         self.followings.confirmed.unblocked.for_follower_type(follower_type).count

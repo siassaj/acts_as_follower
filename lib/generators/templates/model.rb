@@ -11,4 +11,7 @@ class Follow < ActiveRecord::Base
     self.update_attribute(:blocked, true)
   end
 
+  def confirm!
+    self.update_attribute(:confirmed_at, DateTime.now)
+  end
 end

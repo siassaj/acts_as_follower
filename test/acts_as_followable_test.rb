@@ -205,42 +205,96 @@ class ActsAsFollowableTest < ActiveSupport::TestCase
         @jon.follow(@steve)
       end
 
-      should "add to list of unconfirmed followings" do
-        assert_equal 1, @steve.unconfirmed_followings.count
+      context "#confirm_follower" do
+        should "confirm a user who has performed a follow" do
+          @steve.confirm_follower(@jon)
+          assert_not_nil(@steve.followings.first.confirmed_at)
+        end
+
+        should "raise an error when called with a user who hasn't initiated a follow" do
+          assert_raise(Exception) { @steve.confirm_follower(@sam) }
+        end
       end
 
-      should "not add to list of confirmed followings" do
-        assert_equal 0, @steve.confirmed_followings.count
+      context "when uconfirmed" do
+        should "add to unconfirmed followings" do
+          assert_equal 1, @steve.unconfirmed_followings.count
+        end
+
+        should "not add confirmed followings" do
+          assert_equal 0, @steve.confirmed_followings.count
+        end
+
+        should "not affect followings count" do
+          assert_equal 1, @steve.followings.count
+        end
+
+        should "not add to the confirmed followers count" do
+          assert_equal 0, @steve.confirmed_followers_count
+        end
+
+        should "add to the unconfirmed followers count" do
+          assert_equal 1, @steve.unconfirmed_followers_count
+        end
+
+        should "not add to the confirmed followers by type count" do
+          assert_equal 0, @steve.confirmed_followers_by_type_count(User)
+        end
+
+        should "add to the unconfirmed followers by type count" do
+          assert_equal 1, @steve.unconfirmed_followers_by_type_count(User)
+        end
+
+        should "not add to the confirmed followers" do
+          assert_equal [], @steve.confirmed_followers
+        end
+
+        should "add to the unconfirmed followers" do
+          assert_equal [@jon], @steve.unconfirmed_followers
+        end
       end
 
-      should "not affect followings on account" do
-        assert_equal 1, @steve.followings.count
-      end
+      context "when confirmed" do
+        setup do
+          @steve.confirm_follower(@jon)
+        end
 
-      should "not add to the confirmed followers count" do
-        assert_equal 0, @steve.confirmed_followers_count
-      end
+       should "remove from unconfirmed followings" do
+          assert_equal 0, @steve.unconfirmed_followings.count
+        end
 
-      should "add to the unconfirmed followers count" do
-        assert_equal 1, @steve.unconfirmed_followers_count
-      end
+        should "add to confirmed followings" do
+          assert_equal 1, @steve.confirmed_followings.count
+        end
 
-      should "not add to the confirmed followers by type count" do
-        assert_equal 0, @steve.confirmed_followers_by_type_count(User)
-      end
+        should "not affect followings count" do
+          assert_equal 1, @steve.followings.count
+        end
 
-      should "add to the unconfirmed followers by type count" do
-        assert_equal 1, @steve.unconfirmed_followers_by_type_count(User)
-      end
+        should "add to the confirmed followers count" do
+          assert_equal 1, @steve.confirmed_followers_count
+        end
 
-      should "not add to the unconfirmed followers" do
-        assert_equal [], @steve.confirmed_followers
-      end
+        should "remove from the unconfirmed followers count" do
+          assert_equal 0, @steve.unconfirmed_followers_count
+        end
 
-      should "add to the unconfirmed followers" do
-        assert_equal [@jon], @steve.unconfirmed_followers
-      end
+        should "add to the confirmed followers by type count" do
+          assert_equal 1, @steve.confirmed_followers_by_type_count(User)
+        end
 
+        should "remove from the unconfirmed followers by type count" do
+          assert_equal 0, @steve.unconfirmed_followers_by_type_count(User)
+        end
+
+        should "add to the confirmed followers" do
+          assert_equal [@jon], @steve.confirmed_followers
+        end
+
+        should "remove from the unconfirmed followers" do
+          assert_equal [], @steve.unconfirmed_followers
+        end
+      end
     end
 
     context "followers_by_type" do
