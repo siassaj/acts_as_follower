@@ -35,7 +35,7 @@ module ActsAsFollower #:nodoc:
     end
 
     def confirmed
-      where("confirmed_at <> ''")
+      where("confirmed_at IS NOT NULL")
     end
 
     def unconfirmed
