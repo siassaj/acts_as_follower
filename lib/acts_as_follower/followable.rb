@@ -6,10 +6,12 @@ module ActsAsFollower #:nodoc:
     end
 
     module ClassMethods
-      def acts_as_followable
+      def acts_as_followable(opts = {})
         has_many :followings, :as => :followable, :dependent => :destroy, :class_name => 'Follow'
         include ActsAsFollower::Followable::InstanceMethods
         include ActsAsFollower::FollowerLib
+
+        include ActsAsFollower::Followable::Confirmable if opts[:confirmable]
       end
     end
 
@@ -110,5 +112,59 @@ module ActsAsFollower #:nodoc:
 
     end
 
+    module Confirmable
+
+      def confirm_follower(follower)
+        if (follow = get_follow_for(follower)).present?
+          follow.confirm!
+        else
+          raise Exception, "#{follower} has not followed #{self}"
+        end
+      end
+
+      def confirmed_followings
+        self.followings.confirmed
+      end
+
+      def unconfirmed_followings
+        self.followings.unconfirmed
+      end
+
+      def confirmed_followers_count
+        self.followings.confirmed.unblocked.count
+      end
+
+      def unconfirmed_followers_count
+        self.followings.unconfirmed.unblocked.count
+      end
+
+      def confirmed_followers_by_type_count(follower_type)
+        self.followings.confirmed.unblocked.for_follower_type(follower_type).count
+      end
+
+
+      def unconfirmed_followers_by_type_count(follower_type)
+        self.followings.unconfirmed.unblocked.for_follower_type(follower_type).count
+      end
+
+      def confirmed_followers(options={})
+        followers_scope = followers_scoped.unblocked.confirmed
+        followers_scope = apply_options_to_scope(followers_scope, options)
+        followers_scope.to_a.collect{|f| f.follower}
+      end
+
+      def unconfirmed_followers(options={})
+        followers_scope = followers_scoped.unblocked.unconfirmed
+        followers_scope = apply_options_to_scope(followers_scope, options)
+        followers_scope.to_a.collect{|f| f.follower}
+      end
+
+    end
+
   end
 end
+
+
+
+
+

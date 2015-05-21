@@ -34,5 +34,13 @@ module ActsAsFollower #:nodoc:
       where(:blocked => true)
     end
 
+    def confirmed
+      where("confirmed_at <> ''")
+    end
+
+    def unconfirmed
+      where(:confirmed_at => nil)
+    end
+
   end
 end
