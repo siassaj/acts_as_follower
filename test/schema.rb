@@ -6,6 +6,7 @@ ActiveRecord::Schema.define :version => 0 do
     t.integer  "follower_id",     :null => false
     t.string   "follower_type",   :null => false
     t.boolean  "blocked", :default => false, :null => false
+    t.datetime "confirmed_at"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
